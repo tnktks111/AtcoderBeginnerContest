@@ -1,7 +1,6 @@
 import sys
 import typing
 
-
 class CSR:
     def __init__(
             self, n: int, edges: typing.List[typing.Tuple[int, int]]) -> None:
