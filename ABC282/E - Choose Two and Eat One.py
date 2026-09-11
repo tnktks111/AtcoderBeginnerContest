@@ -35,7 +35,7 @@ class UnionFind:
         root_y = self.find(y)
         if root_x == root_y:
             return False
-        if root_x < root_y:
+        if self._size[root_x] < self._size[root_y]:
             root_x, root_y = root_y, root_x
         self._parent[root_y] = root_x
         self._size[root_x] += self._size[root_y]
@@ -61,38 +61,27 @@ class UnionFind:
             result.setdefault(self.find(vertex), []).append(vertex)
         return list(result.values())
 
-N, M, E = map(int, input().split())
+import heapq
 
-edges = [tuple(map(lambda x: int(x) - 1, input().split())) for _ in range(E)]
-uf = UnionFind(N + M)
+N, M = map(int, input().split())
+A = list(map(int, input().split()))
 
-Q = int(input())
-queries = [int(input()) - 1 for _ in range(Q)]
+maxq = []
+for u in range(N - 1):
+    for v in range(u + 1, N):
+        w = (pow(A[u], A[v], M) + pow(A[v], A[u], M)) % M
+        maxq.append((-w, u, v))
 
-query_set = set(queries)
+heapq.heapify(maxq)
+uf = UnionFind(N)
+
 res = 0
-for i in range(E):
-    if i in query_set:
+cnt = 0
+while cnt < N - 1:
+    w, u, v = heapq.heappop(maxq)
+    w *= -1
+    if uf.union(u, v) == False:
         continue
-    u, v = edges[i]
-    u_parent = uf.find(u)
-    v_parent = uf.find(v)
-    if u_parent >= N and v_parent < N:
-        res += uf.size(v_parent)
-    elif v_parent >= N and u_parent < N:
-        res += uf.size(u_parent)
-    uf.union(u_parent, v_parent)
-
-ans = []
-for i in range(Q - 1, -1, -1):
-    ans.append(res)
-    u, v = edges[queries[i]]
-    u_parent = uf.find(u)
-    v_parent = uf.find(v)
-    if u_parent >= N and v_parent < N:
-        res += uf.size(v_parent)
-    elif v_parent >= N and u_parent < N:
-        res += uf.size(u_parent)
-    uf.union(u_parent, v_parent)
-
-print(*ans[::-1], sep="\n")
+    res += w
+    cnt += 1
+print(res)
